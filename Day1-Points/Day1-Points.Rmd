@@ -1,0 +1,49 @@
+---
+title: "Day 1 Challenge -	Point -	A map with points"
+author: "Priyanga Talagala"
+date: "2023-11-01"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+```
+
+#	A map with points
+
+Data source: https://www.geeksforgeeks.org/how-to-make-world-map-with-ggplot2-in-r/
+
+```{r}
+library(tidyverse) 
+  
+# create data for world coordinates using map_data() function 
+world_coordinates <- map_data("world") 
+  
+# read volcano_eruption data from volcano.csv 
+volcano_eruption <- readr::read_csv(here("Day1-Points", "volcano.csv") )
+
+volcano_eruption_new<- volcano_eruption |>
+  mutate(last_eruption_year_new = as.numeric(ifelse(last_eruption_year<=0, 0, last_eruption_year))) 
+
+p <- ggplot() + 
+  geom_map( 
+    data = world_coordinates, map = world_coordinates, 
+    aes(long, lat, map_id = region), 
+    color = "black", fill= "white"
+  )+ 
+geom_point( 
+    data = volcano_eruption_new, 
+    aes(longitude, latitude, color = last_eruption_year_new,
+        size = last_eruption_year_new>=2019), 
+    alpha = 0.9 
+  ) + 
+theme(legend.position="bottom") +
+  scale_color_viridis_c( end = 0.8, option = "H") +
+  guides(color=guide_legend(title="Last eruption year",  nrow = 3),
+         size = guide_legend("Volcano Eruptions Post-2019: Yes or No?", nrow = 3))+
+  labs(title = "A Worldview of Recent Volcanic Eruptions",
+       caption  = "Data Source: https://www.geeksforgeeks.org/how-to-make-world-map-with-ggplot2-in-r/")
+p
+
+```
